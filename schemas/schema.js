@@ -1,5 +1,8 @@
 const graphql = require('graphql')
 const _ = require('lodash')
+const User = require('../model/User')
+const Hobby = require('../model/Hobby')
+const Post = require('../model/Post')
 
 const {
     GraphQLSchema,
@@ -101,6 +104,13 @@ const RootQuery = new GraphQLObjectType({
                return _.find(usersData, { id: args.id})
            }
        },
+       Users: {
+           type: new GraphQLList(UserType),
+           resolve(parent, args){
+               return usersData
+           }
+       },
+
        Hobby: {
            type: HobbyType,
            args: {id: { type:GraphQLID}},
@@ -108,11 +118,24 @@ const RootQuery = new GraphQLObjectType({
                return _.find(hobbyData, {id: args.id})
            }
        },
+       Hobbies: {
+           type: new GraphQLList(HobbyType),
+           resolve(parent, args) {
+               return hobbyData
+           }
+       },
+
        Post: {
            type: PostType,
            args: {id: {type: GraphQLID}},
            resolve(parent, args){
                 return  _.find(postData, {id: args.id})
+           }
+       },
+       Posts: {
+           type: new GraphQLList(PostType),
+           resolve(parent, args){
+               return postData
            }
        }
     }
@@ -132,12 +155,12 @@ const Mutation = new GraphQLObjectType({
                 job: {type: GraphQLString}
             },
             resolve(parent, args) {
-                let user = { 
+                let user = new User({
                     name: args.name,
                     age: args.age,
-                    job: args.jobb
-                }
-                return user
+                    job: args.job
+                })
+                user.save();
             }
         },
         createPost: {
